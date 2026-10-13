@@ -3,7 +3,6 @@ import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { siteConfig } from "@/config/site";
-import { Cursor } from "@/components/motion/Cursor";
 import { SiteProvider } from "@/components/providers/SiteProvider";
 import "./globals.css";
 
@@ -37,7 +36,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es-AR" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body>
         <SiteProvider>
-          <Cursor />
           {children}
         </SiteProvider>
         {GA_ID && (

@@ -24,15 +24,6 @@ body {
   background: rgba(109, 74, 255, 0.45);
 }
 
-/* Cursor personalizado solo en dispositivos con mouse y sin reduced-motion */
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  html.custom-cursor,
-  html.custom-cursor a,
-  html.custom-cursor button {
-    cursor: none;
-  }
-}
-
 @layer utilities {
   .text-gradient-titanium {
     background: linear-gradient(180deg, #ffffff 0%, #bfbcb4 55%, #6b6963 100%);
