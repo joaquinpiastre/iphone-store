@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PhoneCondition {
+  NEW
+  USED
+  LIKE_NEW
+}
+
+enum PhoneStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+}
+
+enum TradeInStatus {
+  NEW
+  CONTACTED
+  CLOSED
+  REJECTED
+}
+
+model Phone {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  model          String
+  storageGb      Int
+  color          String
+  condition      PhoneCondition
+  batteryHealth  Int?
+  imei           String?        @unique
+  accessories    String[]
+  warrantyMonths Int            @default(0)
+  priceUsd       Int
+  costUsd        Int            @default(0)
+  description    String?
+  featured       Boolean        @default(false)
+  status         PhoneStatus    @default(AVAILABLE)
+  soldAt         DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  images   PhoneImage[]
+  requests TradeInRequest[]
+
+  @@index([model])
+  @@index([condition])
+  @@index([priceUsd])
+  @@index([status, featured])
+  @@index([status, createdAt])
+  @@index([batteryHealth])
+}
+
+model PhoneImage {
+  id       String  @id @default(cuid())
+  phoneId  String
+  url      String
+  publicId String?
+  position Int     @default(0)
+  phone    Phone   @relation(fields: [phoneId], references: [id], onDelete: Cascade)
+
+  @@index([phoneId, position])
+}
+
+model TradeInPrice {
+  id           String @id @default(cuid())
+  model        String
+  storageGb    Int
+  basePriceUsd Int
+
+  @@unique([model, storageGb])
+}
+
+model TradeInModifier {
+  id          String @id @default(cuid())
+  group       String
+  option      String
+  label       String
+  discountPct Int    @default(0)
+  position    Int    @default(0)
+
+  @@unique([group, option])
+}
+
+model TradeInRequest {
+  id            String        @id @default(cuid())
+  customerName  String
+  contact       String
+  email         String?
+  model         String
+  storageGb     Int
+  color         String
+  screen        String
+  body          String
+  batteryPct    Int
+  powersOn      Boolean
+  faceIdWorks   Boolean
+  hasBox        Boolean
+  hasCharger    Boolean
+  estimatedUsd  Int
+  targetPhoneId String?
+  differenceUsd Int?
+  status        TradeInStatus @default(NEW)
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  targetPhone Phone? @relation(fields: [targetPhoneId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
