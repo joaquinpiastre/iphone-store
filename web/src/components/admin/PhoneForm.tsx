@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { CONDITION_LABEL, STATUS_LABEL, type Condition, type Phone, type PhoneImage, type PhoneStatus } from "@/lib/types";
 import { ImageDropzone } from "./ImageDropzone";
-import { Field, btnGhost, btnPrimary, inputCls } from "./ui";
+import { Field, btnGhost, btnPrimary, inputCls, selectCls } from "./ui";
 
 const MODELS = [
   "iPhone 11", "iPhone 12", "iPhone 13", "iPhone 14", "iPhone 14 Pro", "iPhone 14 Pro Max",
@@ -103,7 +103,7 @@ export function PhoneForm({ phone }: { phone?: Phone }) {
           </datalist>
         </Field>
         <Field label="Almacenamiento (GB)">
-          <select className={`${inputCls} bg-black`} value={f.storageGb} onChange={(e) => set("storageGb", e.target.value)}>
+          <select className={selectCls} value={f.storageGb} onChange={(e) => set("storageGb", e.target.value)}>
             {[64, 128, 256, 512, 1024, 2048].map((s) => (
               <option key={s} value={s}>
                 {s} GB
@@ -115,7 +115,7 @@ export function PhoneForm({ phone }: { phone?: Phone }) {
           <input required className={inputCls} value={f.color} onChange={(e) => set("color", e.target.value)} />
         </Field>
         <Field label="Estado">
-          <select className={`${inputCls} bg-black`} value={f.condition} onChange={(e) => set("condition", e.target.value as Condition)}>
+          <select className={selectCls} value={f.condition} onChange={(e) => set("condition", e.target.value as Condition)}>
             {Object.entries(CONDITION_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
@@ -139,7 +139,7 @@ export function PhoneForm({ phone }: { phone?: Phone }) {
           <input type="number" min={0} className={inputCls} value={f.warrantyMonths} onChange={(e) => set("warrantyMonths", e.target.value)} />
         </Field>
         <Field label="Disponibilidad">
-          <select className={`${inputCls} bg-black`} value={f.status} onChange={(e) => set("status", e.target.value as PhoneStatus)}>
+          <select className={selectCls} value={f.status} onChange={(e) => set("status", e.target.value as PhoneStatus)}>
             {Object.entries(STATUS_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}

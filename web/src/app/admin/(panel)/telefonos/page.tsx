@@ -12,7 +12,7 @@ import {
   type PhoneStatus,
 } from "@/lib/types";
 import { PhoneArt } from "@/components/ui/PhoneArt";
-import { Pagination, PageHeader, btnGhost, btnPrimary, inputCls, useDebounced } from "@/components/admin/ui";
+import { Pagination, PageHeader, btnGhost, btnPrimary, inputCls, selectCls, useDebounced } from "@/components/admin/ui";
 
 export default function PhonesAdminPage() {
   const [data, setData] = useState<Paged<Phone> | null>(null);
@@ -52,7 +52,7 @@ export default function PhonesAdminPage() {
 
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_180px_180px]">
         <input className={inputCls} placeholder="Buscar modelo, color o IMEI…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className={`${inputCls} bg-black`} value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select className={selectCls} value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">Todos los estados</option>
           {Object.entries(STATUS_LABEL).map(([k, v]) => (
             <option key={k} value={k}>
@@ -60,7 +60,7 @@ export default function PhonesAdminPage() {
             </option>
           ))}
         </select>
-        <select className={`${inputCls} bg-black`} value={condition} onChange={(e) => setCondition(e.target.value)}>
+        <select className={selectCls} value={condition} onChange={(e) => setCondition(e.target.value)}>
           <option value="">Nuevo / usado</option>
           {Object.entries(CONDITION_LABEL).map(([k, v]) => (
             <option key={k} value={k}>

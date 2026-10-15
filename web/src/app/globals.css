@@ -20,6 +20,17 @@ body {
   overflow-x: hidden;
 }
 
+/* Desplegable nativo de los <select>: sin esto algunos navegadores lo dibujan
+   con fondo blanco y el texto claro heredado, y las opciones no se leen. */
+select {
+  color-scheme: dark;
+}
+select option,
+select optgroup {
+  background-color: #111113;
+  color: #f5f5f7;
+}
+
 ::selection {
   background: rgba(109, 74, 255, 0.45);
 }

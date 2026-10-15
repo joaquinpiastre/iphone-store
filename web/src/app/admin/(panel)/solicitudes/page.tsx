@@ -11,7 +11,7 @@ import {
   type RequestStatus,
   type TradeInRequest,
 } from "@/lib/types";
-import { PageHeader, Pagination, btnGhost, inputCls, useDebounced } from "@/components/admin/ui";
+import { PageHeader, Pagination, btnGhost, inputCls, selectCls, useDebounced } from "@/components/admin/ui";
 
 const STATUS_STYLE: Record<RequestStatus, string> = {
   NEW: "bg-violet-glow/20 text-violet-200",
@@ -57,7 +57,7 @@ export default function RequestsPage() {
       <PageHeader title="Solicitudes de canje" />
       <div className="mb-5 grid gap-3 sm:grid-cols-[1fr_200px]">
         <input className={inputCls} placeholder="Buscar cliente, teléfono o modelo…" value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className={`${inputCls} bg-black`} value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select className={selectCls} value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">Todas</option>
           {Object.entries(REQUEST_STATUS_LABEL).map(([k, v]) => (
             <option key={k} value={k}>

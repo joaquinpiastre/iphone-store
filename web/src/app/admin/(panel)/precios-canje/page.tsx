@@ -5,7 +5,7 @@ import { api, ApiError } from "@/lib/api";
 import { fmtUsd } from "@/lib/format";
 import type { QuoteResult } from "@/lib/types";
 import { BODY_LABEL, SCREEN_LABEL } from "@/lib/types";
-import { PageHeader, Toast, btnGhost, btnPrimary, inputCls, useDebounced, useToast } from "@/components/admin/ui";
+import { PageHeader, Toast, btnGhost, btnPrimary, inputCls, selectCls, useDebounced, useToast } from "@/components/admin/ui";
 
 interface Price {
   id: string;
@@ -151,7 +151,7 @@ export default function TradeInPricesPage() {
 
             <form onSubmit={addPrice} className="mt-4 grid gap-3 sm:grid-cols-[1fr_120px_140px_auto]">
               <input required placeholder="Modelo (ej: iPhone 15 Pro)" className={inputCls} value={newRow.model} onChange={(e) => setNewRow({ ...newRow, model: e.target.value })} />
-              <select className={`${inputCls} bg-black`} value={newRow.storageGb} onChange={(e) => setNewRow({ ...newRow, storageGb: e.target.value })}>
+              <select className={selectCls} value={newRow.storageGb} onChange={(e) => setNewRow({ ...newRow, storageGb: e.target.value })}>
                 {[64, 128, 256, 512, 1024].map((s) => (
                   <option key={s} value={s}>
                     {s} GB
@@ -230,7 +230,7 @@ function Preview({ prices, version }: { prices: Price[]; version: number }) {
         <h2 className="mb-4 text-lg font-semibold">Vista previa de cotización</h2>
         <div className="space-y-3">
           <select
-            className={`${inputCls} bg-black`}
+            className={selectCls}
             value={s.model}
             onChange={(e) => {
               const m = e.target.value;
@@ -243,7 +243,7 @@ function Preview({ prices, version }: { prices: Price[]; version: number }) {
               <option key={m}>{m}</option>
             ))}
           </select>
-          <select className={`${inputCls} bg-black`} value={s.storageGb} onChange={(e) => setS({ ...s, storageGb: Number(e.target.value) })}>
+          <select className={selectCls} value={s.storageGb} onChange={(e) => setS({ ...s, storageGb: Number(e.target.value) })}>
             {storages.map((g) => (
               <option key={g} value={g}>
                 {g} GB
@@ -251,14 +251,14 @@ function Preview({ prices, version }: { prices: Price[]; version: number }) {
             ))}
           </select>
           <div className="grid grid-cols-2 gap-3">
-            <select className={`${inputCls} bg-black`} value={s.screen} onChange={(e) => setS({ ...s, screen: e.target.value })}>
+            <select className={selectCls} value={s.screen} onChange={(e) => setS({ ...s, screen: e.target.value })}>
               {Object.entries(SCREEN_LABEL).map(([k, v]) => (
                 <option key={k} value={k}>
                   Pantalla: {v}
                 </option>
               ))}
             </select>
-            <select className={`${inputCls} bg-black`} value={s.body} onChange={(e) => setS({ ...s, body: e.target.value })}>
+            <select className={selectCls} value={s.body} onChange={(e) => setS({ ...s, body: e.target.value })}>
               {Object.entries(BODY_LABEL).map(([k, v]) => (
                 <option key={k} value={k}>
                   Carcasa: {v}

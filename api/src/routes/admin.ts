@@ -10,6 +10,24 @@ import { loadSettings } from "./settings.js";
 
 const idParam = z.object({ id: z.string().min(1) });
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const AR_OFFSET_MS = -3 * 60 * 60 * 1000; // Argentina: UTC-3, sin horario de verano
+
+/** Eventos por día (hora de Argentina) de los últimos `days` días; el último elemento es hoy. */
+function dailySeries(dates: (Date | null)[], days: number, now: Date) {
+  const dayKey = (t: number) => new Date(t + AR_OFFSET_MS).toISOString().slice(0, 10);
+  const counts = new Map<string, number>();
+  for (const d of dates) {
+    if (!d) continue;
+    const k = dayKey(d.getTime());
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+  return Array.from({ length: days }, (_, i) => {
+    const date = dayKey(now.getTime() - (days - 1 - i) * DAY_MS);
+    return { date, count: counts.get(date) ?? 0 };
+  });
+}
+
 export const adminRoutes: FastifyPluginAsync = async (app) => {
   app.addHook("onRequest", requireAdmin);
 
@@ -41,6 +59,94 @@ export const adminRoutes: FastifyPluginAsync = async (app) => {
       pendingRequests: pending,
       recentPhones,
       recentRequests,
+    };
+  });
+
+  /* ------------------------------ Estadísticas ---------------------------- */
+  app.get("/stats", async () => {
+    const now = new Date();
+    const since = (days: number) => new Date(now.getTime() - days * DAY_MS);
+
+    const [
+      byStatus,
+      sold7,
+      sold30,
+      requestsByStatus,
+      requests7,
+      requests30,
+      requestDates,
+      soldDates,
+      topModels,
+      stockModels,
+    ] = await Promise.all([
+      prisma.phone.groupBy({ by: ["status"], _count: true, _sum: { priceUsd: true, costUsd: true } }),
+      prisma.phone.count({ where: { status: "SOLD", soldAt: { gte: since(7) } } }),
+      prisma.phone.aggregate({
+        where: { status: "SOLD", soldAt: { gte: since(30) } },
+        _count: true,
+        _sum: { priceUsd: true, costUsd: true },
+      }),
+      prisma.tradeInRequest.groupBy({ by: ["status"], _count: true }),
+      prisma.tradeInRequest.count({ where: { createdAt: { gte: since(7) } } }),
+      prisma.tradeInRequest.count({ where: { createdAt: { gte: since(30) } } }),
+      prisma.tradeInRequest.findMany({ where: { createdAt: { gte: since(14) } }, select: { createdAt: true } }),
+      prisma.phone.findMany({ where: { status: "SOLD", soldAt: { gte: since(14) } }, select: { soldAt: true } }),
+      prisma.tradeInRequest.groupBy({
+        by: ["model"],
+        _count: { _all: true },
+        orderBy: [{ _count: { model: "desc" } }, { model: "asc" }],
+        take: 5,
+      }),
+      prisma.phone.groupBy({
+        by: ["model"],
+        where: { status: "AVAILABLE" },
+        _count: { _all: true },
+        orderBy: [{ _count: { model: "desc" } }, { model: "asc" }],
+        take: 5,
+      }),
+    ]);
+
+    const phoneCount = (s: string) => byStatus.find((b) => b.status === s)?._count ?? 0;
+    const reqCount = (s: string) => requestsByStatus.find((b) => b.status === s)?._count ?? 0;
+    const soldAll = byStatus.find((b) => b.status === "SOLD");
+    const requestsTotal = requestsByStatus.reduce((a, b) => a + b._count, 0);
+    const revenue30 = sold30._sum.priceUsd ?? 0;
+    const cost30 = sold30._sum.costUsd ?? 0;
+    const revenueAll = soldAll?._sum.priceUsd ?? 0;
+    const costAll = soldAll?._sum.costUsd ?? 0;
+
+    return {
+      phones: {
+        total: byStatus.reduce((a, b) => a + b._count, 0),
+        available: phoneCount("AVAILABLE"),
+        reserved: phoneCount("RESERVED"),
+        sold: phoneCount("SOLD"),
+      },
+      // Los ingresos se calculan al precio de lista del equipo vendido.
+      sales: {
+        last7Days: sold7,
+        last30Days: sold30._count,
+        revenue30DaysUsd: revenue30,
+        profit30DaysUsd: revenue30 - cost30,
+        totalRevenueUsd: revenueAll,
+        totalProfitUsd: revenueAll - costAll,
+      },
+      requests: {
+        total: requestsTotal,
+        new: reqCount("NEW"),
+        contacted: reqCount("CONTACTED"),
+        closed: reqCount("CLOSED"),
+        rejected: reqCount("REJECTED"),
+        last7Days: requests7,
+        last30Days: requests30,
+        closeRatePct: requestsTotal ? Math.round((reqCount("CLOSED") / requestsTotal) * 100) : 0,
+      },
+      daily: {
+        requests: dailySeries(requestDates.map((r) => r.createdAt), 14, now),
+        sales: dailySeries(soldDates.map((p) => p.soldAt), 14, now),
+      },
+      topRequestedModels: topModels.map((m) => ({ model: m.model, count: m._count._all })),
+      stockByModel: stockModels.map((m) => ({ model: m.model, count: m._count._all })),
     };
   });
 

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 
 export const inputCls =
   "w-full rounded-xl border border-white/15 bg-transparent px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-white/50";
+/** Igual que inputCls pero con fondo sólido: el desplegable nativo hereda este fondo y el color del texto. */
+export const selectCls =
+  "w-full rounded-xl border border-white/15 bg-graphite-800 px-3.5 py-2.5 text-sm text-white outline-none transition-colors focus:border-white/50 [color-scheme:dark]";
 export const btnPrimary =
   "rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition-transform hover:scale-[1.03] disabled:opacity-40";
 export const btnGhost =
